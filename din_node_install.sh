@@ -62,12 +62,14 @@ show "Download complete."
 
 chmod +x "$DIN_NODE_DIR/din-chipper-node-cli-linux-amd64"
 
+LICENSE_ARGS=""
 for i in {1..10}; do
     read -p "Enter your license key for license #$i: " license_key
     if [ -z "$license_key" ]; then
         break
     fi
     echo "$license_key" > "$LICENSE_DIR/din_license_$i.license"
+    LICENSE_ARGS+="--license=$LICENSE_DIR/din_license_$i.license "
 done
 
 SERVICE_NAME="din_node"
@@ -81,7 +83,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=$DIN_NODE_DIR
-ExecStart=$DIN_NODE_DIR/din-chipper-node-cli-linux-amd64 --license=$LICENSE_DIR/din_license_1.license --license=$LICENSE_DIR/din_license_2.license
+ExecStart=$DIN_NODE_DIR/din-chipper-node-cli-linux-amd64 $LICENSE_ARGS
 Restart=no
 
 [Install]
