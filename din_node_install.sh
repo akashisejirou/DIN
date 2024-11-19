@@ -49,7 +49,23 @@ fi
 
 DIN_NODE_DIR="/home/$USER/din_node"
 LICENSE_DIR="$DIN_NODE_DIR/license"
+
+# Check if DIN_NODE_DIR exists, if not, create it
+if [ ! -d "$DIN_NODE_DIR" ]; then
+    show "$DIN_NODE_DIR does not exist. Creating directory..."
+    mkdir -p "$DIN_NODE_DIR"
+    if [ $? -ne 0 ]; then
+        show "Failed to create $DIN_NODE_DIR. Exiting."
+        exit 1
+    fi
+fi
+
+# Create the license directory inside DIN_NODE_DIR
 mkdir -p "$LICENSE_DIR"
+if [ $? -ne 0 ]; then
+    show "Failed to create license directory. Exiting."
+    exit 1
+fi
 
 show "Downloading din-chipper-node-cli for architecture $ARCH..."
 curl -L "$DOWNLOAD_URL" -o "$DIN_NODE_DIR/din-chipper-node-cli-linux-amd64"
@@ -62,11 +78,19 @@ show "Download complete."
 
 chmod +x "$DIN_NODE_DIR/din-chipper-node-cli-linux-amd64"
 
+read -p "How many licenses do you have (maximum 10)? " license_count
+
+if [[ "$license_count" -lt 1 || "$license_count" -gt 10 ]]; then
+    show "Invalid number of licenses. Please enter a number between 1 and 10."
+    exit 1
+fi
+
 LICENSE_ARGS=""
-for i in {1..10}; do
+for ((i=1; i<=license_count; i++)); do
     read -p "Enter your license key for license #$i: " license_key
     if [ -z "$license_key" ]; then
-        break
+        show "License key cannot be empty. Exiting."
+        exit 1
     fi
     echo "$license_key" > "$LICENSE_DIR/din_license_$i.license"
     LICENSE_ARGS+="--license=$LICENSE_DIR/din_license_$i.license "
